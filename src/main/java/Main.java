@@ -17,8 +17,12 @@ public class Main {
 
     public static void main(String[] args) {
         final String Y2MATE_URL = "https://www.y2mate.com/en324/youtube-mp3/";
+
         System.out.print("Type YouTube video url: ");
         String url = new Scanner(System.in).nextLine().strip();
-        AudioDownloader.download(Y2MATE_URL + parseURL(url));
+        System.out.println("Downloading started...");
+
+        AudioDownloader.downloadStandardQuality(Y2MATE_URL + parseURL(url));
+        AudioDownloader.downloadBestQuality(Y2MATE_URL + parseURL(url));
     }
 }
