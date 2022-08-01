@@ -33,6 +33,14 @@ public class AudioDownloader {
         return webClient;
     }
 
+    private static void sleep() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void downloadStandardQuality(String URL) {
         WebClient webClient = createWebClient();
 
@@ -42,7 +50,7 @@ public class AudioDownloader {
             // -- Step 1: Click on first button --
             HtmlButton dwnButton;
             do {
-                Thread.sleep(1000);
+                sleep();
                 dwnButton = page.querySelector("button.btn.btn-success.btn-mp3");
             } while (dwnButton == null);
             page.executeJavaScript("document.querySelector('button.btn.btn-success.btn-mp3').click();");
@@ -50,7 +58,7 @@ public class AudioDownloader {
             // -- Step 2: Click on second button --
             HtmlAnchor aButton;
             do {
-                Thread.sleep(1000);
+                sleep();
                 aButton = page.querySelector("a.btn.btn-success.btn-file:not([id])");
             } while (aButton == null);
 
@@ -71,7 +79,7 @@ public class AudioDownloader {
             webClient.getCurrentWindow().getJobManager().removeAllJobs();
             webClient.close();
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             System.out.println("An error occurred in m_std: " + e);
         }
     }
@@ -85,7 +93,7 @@ public class AudioDownloader {
             // -- Step 0.1: Open quality list --
             HtmlButton dropdownToggle;
             do {
-                Thread.sleep(1000);
+                sleep();
                 dropdownToggle = page.querySelector("button.btn.btn-default.dropdown-toggle");
             } while (dropdownToggle == null);
             page.executeJavaScript("document.querySelector('button.btn.btn-default.dropdown-toggle').click()");
@@ -96,7 +104,7 @@ public class AudioDownloader {
             // -- Step 1: Click on first button --
             HtmlButton dwnButton;
             do {
-                Thread.sleep(1000);
+                sleep();
                 dwnButton = page.querySelector("button.btn.btn-success.btn-mp3");
             } while (dwnButton == null);
             page.executeJavaScript("document.querySelector('button.btn.btn-success.btn-mp3').click();");
@@ -104,7 +112,7 @@ public class AudioDownloader {
             // -- Step 2: Click on second button --
             HtmlAnchor aButton;
             do {
-                Thread.sleep(1000);
+                sleep();
                 aButton = page.querySelector("a.btn.btn-success.btn-file:not([id])");
             } while (aButton == null);
 
@@ -125,7 +133,7 @@ public class AudioDownloader {
             webClient.getCurrentWindow().getJobManager().removeAllJobs();
             webClient.close();
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             System.out.println("An error occurred in m_best: " + e);
         }
     }
