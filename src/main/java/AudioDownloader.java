@@ -1,19 +1,22 @@
 import com.gargoylesoftware.htmlunit.*;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.parser.HTMLParserListener;
 import com.gargoylesoftware.htmlunit.javascript.SilentJavaScriptErrorListener;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 
 public class AudioDownloader {
+
+    private static final String PRIMARY_DOWNLOAD_BUTTON_SELECTOR = "button.btn.btn-success.btn-mp3";
+    private static final String SECOND_DOWNLOAD_BUTTON_SELECTOR = "a.btn.btn-success.btn-file:not([id])";
+    private static final String DROPDOWN_TOGGLE_SELECTOR = "button.btn.btn-default.dropdown-toggle";
+    private static final String BEST_QUALITY_OPTION_SELECTOR = "div.col-xs-5.p-t-md > ul > li:nth-child(1) > a";
+
     static {
         // Disabling HTMLUnit logger
         LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
@@ -41,6 +44,19 @@ public class AudioDownloader {
         }
     }
 
+    private static DomElement waitForElementBySelector(HtmlPage page, String selector) {
+        DomElement el;
+        do {
+            sleep();
+            el = page.querySelector(selector);
+        } while (el == null);
+        return el;
+    }
+
+    private static void clickOn(HtmlPage page, String elementSelector) {
+        page.executeJavaScript(String.format("document.querySelector('%s').click();", elementSelector));
+    }
+
     public static void downloadStandardQuality(String URL) {
         WebClient webClient = createWebClient();
 
@@ -48,22 +64,13 @@ public class AudioDownloader {
             HtmlPage page = webClient.getPage(URL);
 
             // -- Step 1: Click on first button --
-            HtmlButton dwnButton;
-            do {
-                sleep();
-                dwnButton = page.querySelector("button.btn.btn-success.btn-mp3");
-            } while (dwnButton == null);
-            page.executeJavaScript("document.querySelector('button.btn.btn-success.btn-mp3').click();");
+            waitForElementBySelector(page, PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
+            clickOn(page, PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
 
             // -- Step 2: Click on second button --
-            HtmlAnchor aButton;
-            do {
-                sleep();
-                aButton = page.querySelector("a.btn.btn-success.btn-file:not([id])");
-            } while (aButton == null);
-
+            waitForElementBySelector(page, SECOND_DOWNLOAD_BUTTON_SELECTOR);
             WebWindow window = page.getEnclosingWindow();
-            page.executeJavaScript("document.querySelectorAll('a.btn.btn-success.btn-file')[1].click();");
+            clickOn(page, SECOND_DOWNLOAD_BUTTON_SELECTOR);
             UnexpectedPage downloadPage = (UnexpectedPage) window.getEnclosedPage();
 
             // -- Step 3: Download --
@@ -91,33 +98,20 @@ public class AudioDownloader {
             HtmlPage page = webClient.getPage(URL);
 
             // -- Step 0.1: Open quality list --
-            HtmlButton dropdownToggle;
-            do {
-                sleep();
-                dropdownToggle = page.querySelector("button.btn.btn-default.dropdown-toggle");
-            } while (dropdownToggle == null);
-            page.executeJavaScript("document.querySelector('button.btn.btn-default.dropdown-toggle').click()");
+            waitForElementBySelector(page, DROPDOWN_TOGGLE_SELECTOR);
+            clickOn(page, DROPDOWN_TOGGLE_SELECTOR);
 
             // -- Step 0.2: Choose best quality --
-            page.executeJavaScript("document.querySelector('div.col-xs-5.p-t-md > ul > li:nth-child(1) > a').click()");
+            clickOn(page, BEST_QUALITY_OPTION_SELECTOR);
 
             // -- Step 1: Click on first button --
-            HtmlButton dwnButton;
-            do {
-                sleep();
-                dwnButton = page.querySelector("button.btn.btn-success.btn-mp3");
-            } while (dwnButton == null);
-            page.executeJavaScript("document.querySelector('button.btn.btn-success.btn-mp3').click();");
+            waitForElementBySelector(page, PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
+            clickOn(page, PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
 
             // -- Step 2: Click on second button --
-            HtmlAnchor aButton;
-            do {
-                sleep();
-                aButton = page.querySelector("a.btn.btn-success.btn-file:not([id])");
-            } while (aButton == null);
-
+            waitForElementBySelector(page, SECOND_DOWNLOAD_BUTTON_SELECTOR);
             WebWindow window = page.getEnclosingWindow();
-            page.executeJavaScript("document.querySelectorAll('a.btn.btn-success.btn-file')[1].click();");
+            clickOn(page, SECOND_DOWNLOAD_BUTTON_SELECTOR);
             UnexpectedPage downloadPage = (UnexpectedPage) window.getEnclosedPage();
 
             // -- Step 3: Download --
