@@ -28,73 +28,12 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        final String YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=HdWrAZP_svk&ab_channel=%D0%A1%D0%B3%D0%BD%D0%B8%D0%B2%D0%BD%D0%B8%D0%BA%D0%B0";
+        final String YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=jaTRNImqnHM&list=RDjaTRNImqnHM&start_radio=1&ab_channel=EurovisionSongContest";
         final String Y2MATE_URL = "https://www.y2mate.com/en324/youtube-mp3/";
         final String url = Y2MATE_URL + parseURL(YOUTUBE_VIDEO_URL);
 
         // ------------------------------
 
-        WebClient webClient = new WebClient(BrowserVersion.CHROME);
-
-        // Configure
-        webClient.getOptions().setJavaScriptEnabled(true);
-        webClient.getOptions().setCssEnabled(true);
-        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setPrintContentOnFailingStatusCode(false);
-
-        try {
-            HtmlPage page = webClient.getPage(url);
-
-
-
-            // -- Step 3 --
-
-            HtmlButton dwnButton;
-            do {
-                Thread.sleep(1000);
-                dwnButton = page.querySelector("button.btn.btn-success.btn-mp3");
-            } while (dwnButton == null);
-            System.out.println("------------------" + dwnButton.getTextContent());
-
-            page.executeJavaScript("document.querySelector('button.btn.btn-success.btn-mp3').click();");
-
-
-            // -- Step 4 --
-
-            HtmlAnchor aButton;
-            do {
-                Thread.sleep(1000);
-                List<DomNode> nodes = page.querySelectorAll("a.btn.btn-success.btn-file");
-
-                if (nodes.size() > 1 && nodes.get(1) != null) {
-                    aButton = (HtmlAnchor) nodes.get(1);
-                    break;
-                }
-
-            } while (true);
-            System.out.println("------------------" + aButton.getTextContent());
-
-            WebWindow window = page.getEnclosingWindow();
-            page.executeJavaScript("document.querySelectorAll('a.btn.btn-success.btn-file')[1].click();");
-            UnexpectedPage downloadPage = (UnexpectedPage) window.getEnclosedPage();
-
-            InputStream initialStream = downloadPage.getInputStream();
-            File targetFile = new File("src/main/java/a.mp3");
-
-            java.nio.file.Files.copy(
-                    initialStream,
-                    targetFile.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
-
-
-            // -- Closing --
-
-            webClient.getCurrentWindow().getJobManager().removeAllJobs();
-            webClient.close();
-
-        } catch (IOException | InterruptedException e) {
-            System.out.println("An error occurred: " + e);
-        }
+        AudioDownloader.download(url);
     }
 }
