@@ -1,4 +1,5 @@
 
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,14 +16,15 @@ public class Main {
         return null;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         final String Y2MATE_URL = "https://www.y2mate.com/en324/youtube-mp3/";
 
         System.out.print("Type YouTube video url: ");
         String url = new Scanner(System.in).nextLine().strip();
         System.out.println("Downloading started...");
 
-        AudioDownloader.downloadStandardQuality(Y2MATE_URL + parseURL(url));
-        AudioDownloader.downloadBestQuality(Y2MATE_URL + parseURL(url));
+        AudioDownloader.download(Y2MATE_URL + parseURL(url), "src/main/resources/vid_std.mp3", Quality.STD);
+        AudioDownloader.download(Y2MATE_URL + parseURL(url), "src/main/resources/vid_best.mp3", Quality.BEST);
+        AudioDownloader.download(Y2MATE_URL + parseURL(url), "src/main/resources/vid_min.mp3", Quality.MIN);
     }
 }
