@@ -39,21 +39,16 @@ public class AudioDownloader {
         return webClient;
     }
 
-    private static void sleep() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static DomElement waitForElementBySelector(HtmlPage page, String selector) {
+    private static void waitForElementBySelector(HtmlPage page, String selector) {
         DomElement el;
         do {
-            sleep();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             el = page.querySelector(selector);
         } while (el == null);
-        return el;
     }
 
     private static void clickOn(HtmlPage page, String elementSelector) {
