@@ -19,9 +19,12 @@ public class Main {
     public static void main(String[] args) throws IOException {
         String url = "https://www.y2mate.com/en324/youtube-mp3/9Y575FhAErM";
         System.out.println("Downloading started...");
-        new AudioDownloader(url, "src/main/resources/vid_std.mp3", Quality.STD);
-        new AudioDownloader(url, "src/main/resources/vid_best.mp3", Quality.BEST);
-        new AudioDownloader(url, "src/main/resources/vid_min.mp3", Quality.MIN);
+
+        Logger logger = System.out::println;
+
+        new AudioDownloader(url, "src/main/resources/vid_std.mp3", Quality.STD, logger);
+        new AudioDownloader(url, "src/main/resources/vid_best.mp3", Quality.BEST, logger);
+        new AudioDownloader(url, "src/main/resources/vid_min.mp3", Quality.MIN, logger);
     }
 
     private static String getPreparedURL() {

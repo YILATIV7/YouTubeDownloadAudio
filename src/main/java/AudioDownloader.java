@@ -28,7 +28,7 @@ public class AudioDownloader {
 
     private final HtmlPage page;
 
-    public AudioDownloader(String URL, String savePath, Quality quality) throws IOException {
+    public AudioDownloader(String URL, String savePath, Quality quality, Logger logger) throws IOException {
         WebClient webClient = new WebClient(BrowserVersion.CHROME);
         webClient.setIncorrectnessListener((message, origin) -> {
         });
@@ -38,30 +38,39 @@ public class AudioDownloader {
         webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.getCache().setMaxSize(Integer.MAX_VALUE);
+        logger.log("-- WebClient constructed");
 
         //
         page = webClient.getPage(URL);
+        logger.log("-- Page received");
 
         chooseQuality(quality);
+        logger.log("-- Quality chose");
 
         // -- Step 1: Click on first button --
         waitForElementBySelector(PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
         clickOn(PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
+        logger.log("-- Clicked on first button");
 
         // -- Step 2: Click on second button --
         waitForElementBySelector(SECOND_DOWNLOAD_BUTTON_SELECTOR);
         WebWindow window = page.getEnclosingWindow();
         clickOn(SECOND_DOWNLOAD_BUTTON_SELECTOR);
         UnexpectedPage downloadPage = (UnexpectedPage) window.getEnclosedPage();
+        logger.log("-- Clicked on second button");
 
         // -- Step 3: Download --
+        logger.log("-- File downloading started");
         InputStream inputStream = downloadPage.getInputStream();
         File targetFile = new File(savePath);
         Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        logger.log("-- File downloaded");
 
         // -- Closing --
+        logger.log("-- Closing WebClient");
         webClient.getCurrentWindow().getJobManager().removeAllJobs();
         webClient.close();
+        logger.log("-- Closed");
     }
 
     private void chooseQuality(Quality quality) {
