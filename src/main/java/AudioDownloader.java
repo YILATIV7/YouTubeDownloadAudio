@@ -26,7 +26,9 @@ public class AudioDownloader {
         java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
     }
 
-    private static WebClient createWebClient() {
+    private final HtmlPage page;
+
+    public AudioDownloader(String URL, String savePath, Quality quality) throws IOException {
         WebClient webClient = new WebClient(BrowserVersion.CHROME);
         webClient.setIncorrectnessListener((message, origin) -> {
         });
@@ -36,10 +38,53 @@ public class AudioDownloader {
         webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.getCache().setMaxSize(Integer.MAX_VALUE);
-        return webClient;
+
+        //
+        page = webClient.getPage(URL);
+
+        chooseQuality(quality);
+
+        // -- Step 1: Click on first button --
+        waitForElementBySelector(PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
+        clickOn(PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
+
+        // -- Step 2: Click on second button --
+        waitForElementBySelector(SECOND_DOWNLOAD_BUTTON_SELECTOR);
+        WebWindow window = page.getEnclosingWindow();
+        clickOn(SECOND_DOWNLOAD_BUTTON_SELECTOR);
+        UnexpectedPage downloadPage = (UnexpectedPage) window.getEnclosedPage();
+
+        // -- Step 3: Download --
+        InputStream inputStream = downloadPage.getInputStream();
+        File targetFile = new File(savePath);
+        Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        // -- Closing --
+        webClient.getCurrentWindow().getJobManager().removeAllJobs();
+        webClient.close();
     }
 
-    private static void waitForElementBySelector(HtmlPage page, String selector) {
+    private void chooseQuality(Quality quality) {
+        if (quality == Quality.BEST) {
+            // -- Step 0.1: Open quality list --
+            waitForElementBySelector(DROPDOWN_TOGGLE_SELECTOR);
+            clickOn(DROPDOWN_TOGGLE_SELECTOR);
+
+            // -- Step 0.2: Choose best quality --
+            clickOn(BEST_QUALITY_OPTION_SELECTOR);
+        } else if (quality == Quality.MIN) {
+            // -- Step 0.1: Open quality list --
+            waitForElementBySelector(DROPDOWN_TOGGLE_SELECTOR);
+            clickOn(DROPDOWN_TOGGLE_SELECTOR);
+
+            // -- Step 0.2: Choose best quality --
+            clickOn(MIN_QUALITY_OPTION_SELECTOR);
+        } else {
+            // do nothing...
+        }
+    }
+
+    private void waitForElementBySelector(String selector) {
         DomElement el;
         do {
             try {
@@ -51,54 +96,7 @@ public class AudioDownloader {
         } while (el == null);
     }
 
-    private static void clickOn(HtmlPage page, String elementSelector) {
+    private void clickOn(String elementSelector) {
         page.executeJavaScript(String.format("document.querySelector('%s').click();", elementSelector));
-    }
-
-    private static void chooseQuality(HtmlPage page, Quality quality) {
-        if (quality == Quality.BEST) {
-            // -- Step 0.1: Open quality list --
-            waitForElementBySelector(page, DROPDOWN_TOGGLE_SELECTOR);
-            clickOn(page, DROPDOWN_TOGGLE_SELECTOR);
-
-            // -- Step 0.2: Choose best quality --
-            clickOn(page, BEST_QUALITY_OPTION_SELECTOR);
-        } else if (quality == Quality.MIN) {
-            // -- Step 0.1: Open quality list --
-            waitForElementBySelector(page, DROPDOWN_TOGGLE_SELECTOR);
-            clickOn(page, DROPDOWN_TOGGLE_SELECTOR);
-
-            // -- Step 0.2: Choose best quality --
-            clickOn(page, MIN_QUALITY_OPTION_SELECTOR);
-        } else {
-            // do nothing...
-        }
-    }
-
-    public static void download(String URL, String savePath, Quality quality) throws IOException {
-        WebClient webClient = createWebClient();
-
-        HtmlPage page = webClient.getPage(URL);
-
-        chooseQuality(page, quality);
-
-        // -- Step 1: Click on first button --
-        waitForElementBySelector(page, PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
-        clickOn(page, PRIMARY_DOWNLOAD_BUTTON_SELECTOR);
-
-        // -- Step 2: Click on second button --
-        waitForElementBySelector(page, SECOND_DOWNLOAD_BUTTON_SELECTOR);
-        WebWindow window = page.getEnclosingWindow();
-        clickOn(page, SECOND_DOWNLOAD_BUTTON_SELECTOR);
-        UnexpectedPage downloadPage = (UnexpectedPage) window.getEnclosedPage();
-
-        // -- Step 3: Download --
-        InputStream inputStream = downloadPage.getInputStream();
-        File targetFile = new File(savePath);
-        Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-        // -- Closing --
-        webClient.getCurrentWindow().getJobManager().removeAllJobs();
-        webClient.close();
     }
 }
