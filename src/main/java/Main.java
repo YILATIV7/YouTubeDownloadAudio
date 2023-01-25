@@ -17,7 +17,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
-        String url = "https://www.y2mate.com/en324/youtube-mp3/9Y575FhAErM";
+        String url = "https://www.y2mate.com/en324/youtube-mp3/9Y575FhAErM";  // Concrete video
         System.out.println("Downloading started...");
 
         Logger logger = System.out::println;

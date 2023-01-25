@@ -1,0 +1,5 @@
+quality dropdown:
+document.querySelector("button.btn.btn-default.dropdown-toggle").click();
+
+the best quality video:
+document.querySelector("div.col-xs-5.p-t-md > ul > li:nth-child(1) > a").click();
